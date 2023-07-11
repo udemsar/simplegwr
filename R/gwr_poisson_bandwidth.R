@@ -71,7 +71,7 @@ gwr_poisson_bandwidth <- function(formula, data, kernel, weighting) {
     medianWhere <- median(where)
     optBandw <- results$bw[medianWhere]
   }
-  plot(results)
+  #plot(results)
   
   print('Done!')
   
