@@ -61,12 +61,6 @@ head(dataGWR)
 #> 4   29.64793 548359.7 189490.8
 #> 5   30.45217 550789.9 186100.8
 #> 6   80.16552 546139.9 183989.2
-plot(dataGWR$x,dataGWR$y)
-```
-
-<img src="man/figures/README-global linear model-1.png" width="100%" />
-
-``` r
 
 # Run a global linear model
 globalmodel <- lm(dataGWR$TURNOUT ~ dataGWR$OVERCROWD + dataGWR$POPDENSITY)
@@ -153,12 +147,56 @@ bwOptimisation <- gwr_bandwidth(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, kerne
 #> [1] 46
 #> [1] "Done!"
 bwOpt <- bwOptimisation[[1]] # This is the bandwidth where AICc is the lowest.
-plot(bwOptimisation[[2]]) # This is a plot of all AICc values, to show how bwOpt was selected.
-```
-
-<img src="man/figures/README-fixed weighting GWR model-1.png" width="100%" />
-
-``` r
+bwOpt
+#> [1] 11550
+bwOptimisation[[2]]
+#>       bw localAICc
+#> 1   5250  3770.240
+#> 2   6300  3769.005
+#> 3   7350  3768.039
+#> 4   8400  3767.373
+#> 5   9450  3766.889
+#> 6  10500  3766.577
+#> 7  11550  3766.497
+#> 8  12600  3766.757
+#> 9  13650  3767.429
+#> 10 14700  3768.588
+#> 11 15750  3770.287
+#> 12 16800  3772.629
+#> 13 17850  3775.803
+#> 14 18900  3780.046
+#> 15 19950  3785.539
+#> 16 21000  3792.344
+#> 17 22050  3800.379
+#> 18 23100  3809.427
+#> 19 24150  3819.133
+#> 20 25200  3829.072
+#> 21 26250  3838.841
+#> 22 27300  3848.110
+#> 23 28350  3856.609
+#> 24 29400  3864.135
+#> 25 30450  3870.594
+#> 26 31500  3875.973
+#> 27 32550  3880.301
+#> 28 33600  3883.685
+#> 29 34650  3886.247
+#> 30 35700  3888.114
+#> 31 36750  3889.328
+#> 32 37800  3889.938
+#> 33 38850  3889.999
+#> 34 39900  3889.582
+#> 35 40950  3888.743
+#> 36 42000  3887.519
+#> 37 43050  3885.958
+#> 38 44100  3884.126
+#> 39 45150  3882.058
+#> 40 46200  3879.751
+#> 41 47250  3877.197
+#> 42 48300  3874.373
+#> 43 49350  3871.292
+#> 44 50400  3867.959
+#> 45 51450  3864.396
+#> 46 52500  3860.601
 
 # Run GWR with optimal bandwidth
 localResults <- gwr_basic(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, bwOpt, kernel="bisquare",
@@ -168,10 +206,9 @@ localResults <- gwr_basic(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, bwOpt, kern
 # Explore results
 localStats <- localResults[[1]]
 localParams <- localResults[[2]]
-localAIC <- localStats$AICc[1]
 localStats
-#>          R2     AdjR2     AICc
-#> 1 0.6819003 0.6767244 3766.497
+#>          R2     AdjR2     AICc bwOpt
+#> 1 0.6819003 0.6767244 3766.497 11550
 head(localParams)
 #>        CODE FID              BOROUGH           WARD  TURNOUT OVERCROWD
 #> 1 E05000026 611 Barking and Dagenham          Abbey 25.68894 23.797025
@@ -271,22 +308,70 @@ bwOptimisation <- gwr_bandwidth(TURNOUT ~ POPDENSITY + OVERCROWD, dataGWR, kerne
 #> [1] 51
 #> [1] "Done!"
 bwOpt <- bwOptimisation[[1]]
-plot(bwOptimisation[[2]])
-```
-
-<img src="man/figures/README-adaptive weighting gwr model-1.png" width="100%" />
-
-``` r
+bwOpt
+#> [1] 24
+bwOptimisation[[2]]
+#>     bw localAICc
+#> 1   24  3768.215
+#> 2   36  3770.671
+#> 3   48  3772.991
+#> 4   60  3774.565
+#> 5   72  3775.517
+#> 6   84  3775.970
+#> 7   96  3776.364
+#> 8  108  3776.894
+#> 9  120  3777.543
+#> 10 132  3778.086
+#> 11 144  3778.402
+#> 12 156  3778.717
+#> 13 168  3778.844
+#> 14 180  3778.926
+#> 15 192  3779.070
+#> 16 204  3778.982
+#> 17 216  3778.759
+#> 18 228  3778.561
+#> 19 240  3778.179
+#> 20 252  3777.871
+#> 21 264  3777.424
+#> 22 276  3777.007
+#> 23 288  3776.677
+#> 24 300  3776.416
+#> 25 312  3776.180
+#> 26 324  3775.862
+#> 27 336  3775.669
+#> 28 348  3775.547
+#> 29 360  3775.272
+#> 30 372  3775.235
+#> 31 384  3775.135
+#> 32 396  3775.139
+#> 33 408  3775.277
+#> 34 420  3775.647
+#> 35 432  3776.101
+#> 36 444  3776.653
+#> 37 456  3777.457
+#> 38 468  3778.604
+#> 39 480  3780.050
+#> 40 492  3781.813
+#> 41 504  3783.915
+#> 42 516  3786.264
+#> 43 528  3788.785
+#> 44 540  3791.715
+#> 45 552  3795.127
+#> 46 564  3799.154
+#> 47 576  3803.876
+#> 48 588  3809.672
+#> 49 600  3817.133
+#> 50 612  3829.021
+#> 51 624  3844.988
 
 # GWR with optimal bandwidth
 localResults <- gwr_basic(TURNOUT ~ POPDENSITY + OVERCROWD, dataGWR, bwOpt, kernel="bisquare",
                           weighting='adaptive')
 localStats <- localResults[[1]]
 localParams <- localResults[[2]]
-localAIC <- localStats$AICc[1]
 localStats
-#>          R2    AdjR2     AICc
-#> 1 0.8248719 0.808193 3768.215
+#>          R2    AdjR2     AICc bwOpt
+#> 1 0.8248719 0.808193 3768.215    24
 head(localParams)
 #>        CODE FID              BOROUGH           WARD  TURNOUT OVERCROWD
 #> 1 E05000026 611 Barking and Dagenham          Abbey 25.68894 23.797025
@@ -411,7 +496,8 @@ summary(globalPM)$coefficients[,4] # p-values
 #str(summary(globalPM))
 globalPM$deviance[[1]] #deviance
 #> [1] 1637.205
-globalAIC <- globalPM$aic[[1]] #aic
+globalPM$aic[[1]] #aic
+#> [1] 1862.719
 ```
 
 And then we can test Poisson GWR, this time just adaptive weighting
@@ -466,84 +552,84 @@ bwOptimisation <- gwr_poisson_bandwidth(formula, dataP, kernel="bisquare", weigh
 #> [1] 33
 #> [1] 34
 #> [1] 35
-#> [1] "Done!"
-bwOpt <- bwOptimisation[[1]]
-plot(bwOptimisation[[2]])
 ```
 
 <img src="man/figures/README-adaptive weighting Poisson model-1.png" width="100%" />
 
-``` r
-# GWR with optimal bandwidth
-localResultsP <- gwr_poisson(formula, dataP, bwOpt, kernel="bisquare",
-                             weighting='adaptive')
-#> Warning in log(yy/yyP): NaNs produced
-localStats <- localResultsP[[1]]
-localParams <- localResultsP[[2]]
-localAIC <- localStats$AIC[1]
-localStats
-#>   Deviance     AICc
-#> 1      NaN 278.2093
-head(localParams)
-#>   Camera       Lon      Lat Heigh_vege Deer Elevation        x        y
-#> 1   shp1 -4.169806 56.62001     30.450  170       585 266955.3 749679.4
-#> 2  shp10 -4.213999 56.61598     21.450   83       762 264229.6 749317.5
-#> 3  shp11 -4.203300 56.61360     25.275  127       644 264877.5 749032.3
-#> 4  shp12 -4.187722 56.62476     24.825   42       649 265873.0 750243.2
-#> 5  shp13 -4.226357 56.61016     32.275    7       614 263450.3 748694.8
-#> 6  shp14 -4.225610 56.62131     11.000    2       995 263536.4 749934.3
-#>   Intercept_coeff Intercept_StErr Intercept_tvalue Elevation_coeff
-#> 1      1.07584863       0.2236789        4.8097903     0.012320073
-#> 2      0.94884624       0.2331599        4.0695094     0.002412939
-#> 3      0.03938834       0.3055684        0.1289019    -0.002174586
-#> 4     -0.65529987       0.4655810       -1.4074883     0.035678969
-#> 5      0.35221465       0.2725089        1.2924886     0.004949817
-#> 6      0.79912589       0.2457985        3.2511425     0.015940331
-#>   Elevation_StErr Elevation_tvalue Heigh_vege_coeff Heigh_vege_StErr
-#> 1     0.003476259        3.5440611     0.0004040098     0.0011602173
-#> 2     0.002388831        1.0100922     0.0027772823     0.0005042061
-#> 3     0.003836942       -0.5667497     0.0055554355     0.0009857644
-#> 4     0.014469833        2.4657486     0.0034116978     0.0008117339
-#> 5     0.005228928        0.9466219     0.0047163335     0.0005586649
-#> 6     0.006527755        2.4419315     0.0019015389     0.0003660687
-#>   Heigh_vege_tvalue     LocRes      StLocRes deviance      AIC         yP
-#> 1          0.348219 134.909651  1.4190218717 27.86521 72.28337  35.090349
-#> 2          5.508229  60.330685  0.1027807127 38.13493 85.96121  22.669315
-#> 3          5.635662 122.702932  1.2035859724  9.95289 51.54466   4.297068
-#> 4          4.202976  54.555111  0.0008478333 11.77948 51.98517 -12.555111
-#> 5          8.442151  -7.298205 -1.0907988422 23.60691 67.36339  14.298205
-#> 6          5.194487  -8.714297 -1.1157913792 26.63396 70.18569  10.714297
-plot(sort(localParams$Intercept_coeff))
-```
-
-<img src="man/figures/README-adaptive weighting Poisson model-2.png" width="100%" />
-
-``` r
-plot(sort(localParams$Intercept_tvalue))
-```
-
-<img src="man/figures/README-adaptive weighting Poisson model-3.png" width="100%" />
-
-``` r
-plot(sort(localParams$Elevation_coeff))
-```
-
-<img src="man/figures/README-adaptive weighting Poisson model-4.png" width="100%" />
-
-``` r
-plot(sort(localParams$Elevation_tvalue))
-```
-
-<img src="man/figures/README-adaptive weighting Poisson model-5.png" width="100%" />
-
-``` r
-plot(sort(localParams$Heigh_vege_coeff))
-```
-
-<img src="man/figures/README-adaptive weighting Poisson model-6.png" width="100%" />
-
-``` r
-plot(sort(localParams$Heigh_vege_tvalue))
-```
-
-<img src="man/figures/README-adaptive weighting Poisson model-7.png" width="100%" />
+    #> [1] "Done!"
+    bwOpt <- bwOptimisation[[1]]
+    bwOptimisation[[2]]
+    #>    bw localAICc
+    #> 1   5  278.9982
+    #> 2   6  278.8314
+    #> 3   7  278.7815
+    #> 4   8  278.7990
+    #> 5   9  278.7515
+    #> 6  10  278.5697
+    #> 7  11  278.3887
+    #> 8  12  278.2300
+    #> 9  13  278.2093
+    #> 10 14  278.3640
+    #> 11 15  278.5810
+    #> 12 16  278.8476
+    #> 13 17  279.7626
+    #> 14 18  280.6344
+    #> 15 19  281.0879
+    #> 16 20  282.6736
+    #> 17 21  283.3222
+    #> 18 22  284.5672
+    #> 19 23  285.1042
+    #> 20 24  287.3229
+    #> 21 25  288.5005
+    #> 22 26  289.6969
+    #> 23 27  291.2543
+    #> 24 28  292.7463
+    #> 25 29  292.3302
+    #> 26 30  292.6920
+    #> 27 31  293.8193
+    #> 28 32  295.7869
+    #> 29 33  292.9035
+    #> 30 34  291.3209
+    #> 31 35  296.8421
+    #> 32 36  311.0944
+    #> 33 37  378.9308
+    #> 34 38  378.9308
+    #> 35 39  378.9308
+    # GWR with optimal bandwidth
+    localResultsP <- gwr_poisson(formula, dataP, bwOpt, kernel="bisquare",
+                                 weighting='adaptive')
+    #> Warning in log(yy/yyP): NaNs produced
+    localStats <- localResultsP[[1]]
+    localParams <- localResultsP[[2]]
+    localStats
+    #>   Deviance     AICc bwOpt
+    #> 1      NaN 278.2093    13
+    head(localParams)
+    #>   Camera       Lon      Lat Heigh_vege Deer Elevation        x        y
+    #> 1   shp1 -4.169806 56.62001     30.450  170       585 266955.3 749679.4
+    #> 2  shp10 -4.213999 56.61598     21.450   83       762 264229.6 749317.5
+    #> 3  shp11 -4.203300 56.61360     25.275  127       644 264877.5 749032.3
+    #> 4  shp12 -4.187722 56.62476     24.825   42       649 265873.0 750243.2
+    #> 5  shp13 -4.226357 56.61016     32.275    7       614 263450.3 748694.8
+    #> 6  shp14 -4.225610 56.62131     11.000    2       995 263536.4 749934.3
+    #>   Intercept_coeff Intercept_StErr Intercept_tvalue Elevation_coeff
+    #> 1      1.07584863       0.2236789        4.8097903     0.012320073
+    #> 2      0.94884624       0.2331599        4.0695094     0.002412939
+    #> 3      0.03938834       0.3055684        0.1289019    -0.002174586
+    #> 4     -0.65529987       0.4655810       -1.4074883     0.035678969
+    #> 5      0.35221465       0.2725089        1.2924886     0.004949817
+    #> 6      0.79912589       0.2457985        3.2511425     0.015940331
+    #>   Elevation_StErr Elevation_tvalue Heigh_vege_coeff Heigh_vege_StErr
+    #> 1     0.003476259        3.5440611     0.0004040098     0.0011602173
+    #> 2     0.002388831        1.0100922     0.0027772823     0.0005042061
+    #> 3     0.003836942       -0.5667497     0.0055554355     0.0009857644
+    #> 4     0.014469833        2.4657486     0.0034116978     0.0008117339
+    #> 5     0.005228928        0.9466219     0.0047163335     0.0005586649
+    #> 6     0.006527755        2.4419315     0.0019015389     0.0003660687
+    #>   Heigh_vege_tvalue     LocRes      StLocRes deviance      AIC         yP
+    #> 1          0.348219 134.909651  1.4190218717 27.86521 72.28337  35.090349
+    #> 2          5.508229  60.330685  0.1027807127 38.13493 85.96121  22.669315
+    #> 3          5.635662 122.702932  1.2035859724  9.95289 51.54466   4.297068
+    #> 4          4.202976  54.555111  0.0008478333 11.77948 51.98517 -12.555111
+    #> 5          8.442151  -7.298205 -1.0907988422 23.60691 67.36339  14.298205
+    #> 6          5.194487  -8.714297 -1.1157913792 26.63396 70.18569  10.714297

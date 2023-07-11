@@ -33,6 +33,7 @@ You can install the latest (under development version) of simplegwr from github 
 
 ```{r gh-installation, eval = TRUE, message = FALSE, warning = FALSE}
 devtools::install_github("udemsar/simplegwr")
+library(simplegwr)
 ```
 
 ## Example
@@ -47,7 +48,6 @@ First run a global model
 # Read test data 
 data(dataGWR) 
 head(dataGWR)
-plot(dataGWR$x,dataGWR$y)
 
 # Run a global linear model
 globalmodel <- lm(dataGWR$TURNOUT ~ dataGWR$OVERCROWD + dataGWR$POPDENSITY)
@@ -68,7 +68,8 @@ Now let's test GWR modelling with fixed weighting.
 # Calculate Optimal bandwidth - because this is fixed weighting, this is given as geographic distance.
 bwOptimisation <- gwr_bandwidth(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, kernel="bisquare", weighting='fixed')
 bwOpt <- bwOptimisation[[1]] # This is the bandwidth where AICc is the lowest.
-plot(bwOptimisation[[2]]) # This is a plot of all AICc values, to show how bwOpt was selected.
+bwOpt
+bwOptimisation[[2]]
 
 # Run GWR with optimal bandwidth
 localResults <- gwr_basic(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, bwOpt, kernel="bisquare",
@@ -78,7 +79,6 @@ localResults <- gwr_basic(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, bwOpt, kern
 # Explore results
 localStats <- localResults[[1]]
 localParams <- localResults[[2]]
-localAIC <- localStats$AICc[1]
 localStats
 head(localParams)
 ```
@@ -91,14 +91,14 @@ And with adaptive weighting:
 # Here the bandwidth is number of nearest neighbours
 bwOptimisation <- gwr_bandwidth(TURNOUT ~ POPDENSITY + OVERCROWD, dataGWR, kernel="bisquare", weighting='adaptive')
 bwOpt <- bwOptimisation[[1]]
-plot(bwOptimisation[[2]])
+bwOpt
+bwOptimisation[[2]]
 
 # GWR with optimal bandwidth
 localResults <- gwr_basic(TURNOUT ~ POPDENSITY + OVERCROWD, dataGWR, bwOpt, kernel="bisquare",
                           weighting='adaptive')
 localStats <- localResults[[1]]
 localParams <- localResults[[2]]
-localAIC <- localStats$AICc[1]
 localStats
 head(localParams)
 ```
@@ -128,7 +128,7 @@ summary(globalPM)$coefficients[,3] # t-values
 summary(globalPM)$coefficients[,4] # p-values
 #str(summary(globalPM))
 globalPM$deviance[[1]] #deviance
-globalAIC <- globalPM$aic[[1]] #aic
+globalPM$aic[[1]] #aic
 ```
 
 And then we can test Poisson GWR, this time just adaptive weighting (although fixed also works).
@@ -138,21 +138,13 @@ And then we can test Poisson GWR, this time just adaptive weighting (although fi
 ## 1. adaptive weighting
 bwOptimisation <- gwr_poisson_bandwidth(formula, dataP, kernel="bisquare", weighting='adaptive')
 bwOpt <- bwOptimisation[[1]]
-plot(bwOptimisation[[2]])
+bwOptimisation[[2]]
 # GWR with optimal bandwidth
 localResultsP <- gwr_poisson(formula, dataP, bwOpt, kernel="bisquare",
                              weighting='adaptive')
 localStats <- localResultsP[[1]]
 localParams <- localResultsP[[2]]
-localAIC <- localStats$AIC[1]
 localStats
 head(localParams)
-plot(sort(localParams$Intercept_coeff))
-plot(sort(localParams$Intercept_tvalue))
-plot(sort(localParams$Elevation_coeff))
-plot(sort(localParams$Elevation_tvalue))
-plot(sort(localParams$Heigh_vege_coeff))
-plot(sort(localParams$Heigh_vege_tvalue))
-
 ```
 
