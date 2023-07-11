@@ -222,8 +222,8 @@ gwr_poisson <- function(formula, data, bw, kernel, weighting) {
   localDeviance <- 2* sum(yy * log(yy/yyP) - (yy-yyP))
   
   # Put it all togehter
-  summaryGWR <- c(localDeviance,localAICc)
-  names(summaryGWR) <- c('Deviance','AICc')  
+  summaryGWR <- c(localDeviance,localAICc,bw)
+  names(summaryGWR) <- c('Deviance','AICc','bwOpt')  
   
   #-------  
   ## Step 5: output 
