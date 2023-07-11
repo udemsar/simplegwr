@@ -207,8 +207,8 @@ gwr_basic <- function(formula, data, bw, kernel, weighting) {
   localAICc <- 2*n*log(sqrt(sigma2))+n*log(2*pi)+ n*((n+trH)/(n-2-trH))
   
   # Calculate average R2 and AdjR2
-  summaryGWR <- c(mean(data$R2),mean(data$AdjR2),localAICc,bwOpt)
-  names(summaryGWR) <- c('R2','AdjR2','AICc','bw')  
+  summaryGWR <- c(mean(data$R2),mean(data$AdjR2),localAICc,bw)
+  names(summaryGWR) <- c('R2','AdjR2','AICc','bwOpt')  
   
   #-------  
   ## Step 5: output 
