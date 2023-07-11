@@ -1,0 +1,158 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# simplegwr
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+simplegwr is an R package with functions for a basic geographically weighted regression analysis. It was developed for the purpose of introductory undergraduate teaching, as other gwr packages are often too complex for this level. It is also free of any dependencies on various spatial packages that seem to come and go and only uses basic R functions. As such the hope is that it does not have to be continuously changed and that once students master this, they can use it throughout their studies.
+
+The package supports the following:
+- a linear and a Poisson GWR model 
+- using adaptive or fixed weighting
+- bi-square kernel
+- optimisation of bandwidth for both linear and Poisson version using AICc 
+
+
+## Installation
+
+You can install the latest (under development version) of simplegwr from github with:
+
+```{r gh-installation, eval = TRUE, message = FALSE, warning = FALSE}
+devtools::install_github("udemsar/simplegwr")
+```
+
+## Example
+
+We provide two data sets to test the package, one for linear (dataGWR) and one for Poisson model (dataP).
+
+Here is an example of a linear GWR model, using data on electoral turnout in London. Specifically, we are modelling the relationship between the turnout and two demographic characteristics, overcrowding and population density. Note that input data have to have two geographic coordinates, called x and y, which have to be in a projected coordinate system (this won't work for lon/lat coordinates!). 
+
+First run a global model
+
+```{r global linear model}
+# Read test data 
+data(dataGWR) 
+head(dataGWR)
+plot(dataGWR$x,dataGWR$y)
+
+# Run a global linear model
+globalmodel <- lm(dataGWR$TURNOUT ~ dataGWR$OVERCROWD + dataGWR$POPDENSITY)
+
+# Explore results, which can later be compared to the local GWR model
+summary(globalmodel)
+
+```
+
+Now let's test GWR modelling with fixed weighting.
+
+```{r fixed weighting GWR model}
+## Test gwr functions
+##-----------------------
+
+## 1. fixed weighting
+
+# Calculate Optimal bandwidth - because this is fixed weighting, this is given as geographic distance.
+bwOptimisation <- gwr_bandwidth(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, kernel="bisquare", weighting='fixed')
+bwOpt <- bwOptimisation[[1]] # This is the bandwidth where AICc is the lowest.
+plot(bwOptimisation[[2]]) # This is a plot of all AICc values, to show how bwOpt was selected.
+
+# Run GWR with optimal bandwidth
+localResults <- gwr_basic(TURNOUT ~ OVERCROWD + POPDENSITY, dataGWR, bwOpt, kernel="bisquare",
+                          weighting='fixed')
+# Results are a list with two elements: 1) summary statistics (R2, AICc), 2) a data frame with
+# parameter estimates and related values (standard error, t-values, local residuals, predicted value)
+# Explore results
+localStats <- localResults[[1]]
+localParams <- localResults[[2]]
+localAIC <- localStats$AICc[1]
+localStats
+head(localParams)
+```
+
+And with adaptive weighting:
+
+```{r adaptive weighting gwr model}
+##-----------------------
+## 2. adaptive weighting
+# Here the bandwidth is number of nearest neighbours
+bwOptimisation <- gwr_bandwidth(TURNOUT ~ POPDENSITY + OVERCROWD, dataGWR, kernel="bisquare", weighting='adaptive')
+bwOpt <- bwOptimisation[[1]]
+plot(bwOptimisation[[2]])
+
+# GWR with optimal bandwidth
+localResults <- gwr_basic(TURNOUT ~ POPDENSITY + OVERCROWD, dataGWR, bwOpt, kernel="bisquare",
+                          weighting='adaptive')
+localStats <- localResults[[1]]
+localParams <- localResults[[2]]
+localAIC <- localStats$AICc[1]
+localStats
+head(localParams)
+```
+
+
+Example for Poisson model, here we model how count of deer on camera traps is related to vegetation height and elevation. Note that input data have to have two geographic coordinates, called x and y, which have to be in a projected coordinate system (this won't work for lon/lat coordinates!).
+
+As before, first build a global model:
+
+```{r global Poisson model}
+# Test on camera trap data
+data(dataP) 
+head(dataP)
+formula <- Deer ~ Elevation + Heigh_vege
+
+# Global Poisson regression
+globalPM <- glm(formula, family = poisson(link = log), data = dataP)
+summary(globalPM)
+globalPM$coefficients[[1]]
+globalPM$coefficients[[2]]
+globalPM$coefficients[[3]]
+summary(globalPM)
+summary(globalPM)$coefficients[,1] # param estimates 
+summary(globalPM)$coefficients[1,1]  
+summary(globalPM)$coefficients[,2] # st errors
+summary(globalPM)$coefficients[,3] # t-values
+summary(globalPM)$coefficients[,4] # p-values
+#str(summary(globalPM))
+globalPM$deviance[[1]] #deviance
+globalAIC <- globalPM$aic[[1]] #aic
+```
+
+And then we can test Poisson GWR, this time just adaptive weighting (although fixed also works).
+
+```{r adaptive weighting Poisson model}
+
+## 1. adaptive weighting
+bwOptimisation <- gwr_poisson_bandwidth(formula, dataP, kernel="bisquare", weighting='adaptive')
+bwOpt <- bwOptimisation[[1]]
+plot(bwOptimisation[[2]])
+# GWR with optimal bandwidth
+localResultsP <- gwr_poisson(formula, dataP, bwOpt, kernel="bisquare",
+                             weighting='adaptive')
+localStats <- localResultsP[[1]]
+localParams <- localResultsP[[2]]
+localAIC <- localStats$AIC[1]
+localStats
+head(localParams)
+plot(sort(localParams$Intercept_coeff))
+plot(sort(localParams$Intercept_tvalue))
+plot(sort(localParams$Elevation_coeff))
+plot(sort(localParams$Elevation_tvalue))
+plot(sort(localParams$Heigh_vege_coeff))
+plot(sort(localParams$Heigh_vege_tvalue))
+
+```
+
